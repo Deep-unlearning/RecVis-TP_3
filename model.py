@@ -11,10 +11,8 @@ class Net(nn.Module):
         super(Net, self).__init__()
         # Use pretrained model from torchvision
         self.vit = models.vit_h_14(weights=models.ViT_H_14_Weights.IMAGENET1K_SWAG_E2E_V1)
-        # Replace last layer
-        num_ftrs = self.vit.head.in_features
-        self.resnet50.fc = nn.Linear(num_ftrs, nclasses)
-
+        
+        
 
     def forward(self, x):
         x = self.vit(x)
