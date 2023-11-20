@@ -9,15 +9,15 @@ nclasses = 250
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        # Use pretrained Transformer Vision model
-        self.vit = models.vit_h_14(weights=models.ViT_H_14_Weights)
+        # Use pretrained model from torchvision
+        self.vit = models.vit_h_14(weights=models.ViT_H_14_Weights.IMAGENET1K_SWAG_E2E_V1)
         # Replace last layer
-        num_ftrs = self.resnet50.fc.in_features
+        num_ftrs = self.vit.head.in_features
         self.resnet50.fc = nn.Linear(num_ftrs, nclasses)
 
 
     def forward(self, x):
-        x = self.resnet50(x)
+        x = self.vit(x)
         # add dropout layer
         x = F.dropout(x, p=0.2, training=self.training)
         # add softmax activation layer
