@@ -10,7 +10,7 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         # Use pretrained EfficientNet model
-        self.efficientnet = models.efficientnet_v2_l(weights=models.EfficientNet_V2_L_Weights.DEFAULT)
+        self.efficientnet = models.efficientnet_v2_m(weights='DEFAULT')
 
         # Get the number of input features of the original classifier
         num_features = self.efficientnet.classifier[1].in_features
