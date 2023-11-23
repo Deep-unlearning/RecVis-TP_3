@@ -14,7 +14,7 @@ class Net(nn.Module):
         
         # Replace the last layer with a new, untrained one
         num_ftrs = self.efficientnet.fc.in_features
-        self.efficientnet.fc = nn.Linear(num_ftrs, nclasses)
+        self.efficientnet.head = nn.Linear(num_ftrs, nclasses)
 
 
 
