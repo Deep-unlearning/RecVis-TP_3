@@ -11,20 +11,20 @@ class Net(nn.Module):
         super(Net, self).__init__()
         # Use pretrained EfficientNet model
         self.efficientnet = models.swin_v2_t(weights='DEFAULT')
+        
+        # Replace the last layer with a new, untrained one
+        num_ftrs = self.efficientnet.fc.in_features
+        self.efficientnet.fc = nn.Linear(num_ftrs, nclasses)
 
-        # Get the number of input features of the original classifier
-        num_features = self.efficientnet.classifier[1].in_features
 
-        # Add dropout before the final fully connected layer
-        self.dropout = nn.Dropout(0.2)  # You can adjust the dropout rate as needed
-
-        # Replace the classifier with a new one (dropout + linear layer)
-        self.efficientnet.classifier = nn.Sequential(
-            self.dropout,
-            nn.Linear(num_features, nclasses)
-        )
 
     def forward(self, x):
         # Pass x through the EfficientNet model
         x = self.efficientnet(x)
+
+        # add dropout layer
+        x = F.dropout(x, p=0.2, training=self.training)
+
+        # add softmax activation layer
+        x = F.log_softmax(x, dim=1)
         return x
