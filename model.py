@@ -10,14 +10,14 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         # Use pretrained ImageNet model
-        self.resnet50 = models.efficientnet_v2_l(weights=models.EfficientNet_V2_L_Weights.DEFAULT)
+        self.efficientnet = models.efficientnet_v2_l(weights=models.EfficientNet_V2_L_Weights.DEFAULT)
         # Replace last layer
-        num_ftrs = self.resnet50.fc.in_features
-        self.resnet50.fc = nn.Linear(num_ftrs, nclasses)
+        self.efficientnet.classifier = nn.Linear(self.efficientnet.classifier.in_features, nclasses)
+
 
 
     def forward(self, x):
-        x = self.resnet50(x)
+        x = self.efficientnet(x)
         # add dropout layer
         x = F.dropout(x, p=0.2, training=self.training)
         # add softmax activation layer
