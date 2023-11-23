@@ -91,6 +91,7 @@ def train(
     use_cuda: bool,
     epoch: int,
     args: argparse.ArgumentParser,
+    scheduler: torch.optim.lr_scheduler,
 ) -> None:
     """Default Training Loop.
 
@@ -132,6 +133,7 @@ def train(
             100.0 * correct / len(train_loader.dataset),
         )
     )
+    scheduler.step()
 
 
 def validation(
@@ -214,15 +216,16 @@ def main():
 
     # Setup optimizer
     # Use Adam optimizer
-    # optimizer = optim.Adam(model.parameters(), lr=args.lr)
-    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
-
+    optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-5)
+    # optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
+    # Setup scheduler
+    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
 
     # Loop over the epochs
     best_val_loss = 1e8
     for epoch in range(1, args.epochs + 1):
         # training loop
-        train(model, optimizer, train_loader, use_cuda, epoch, args)
+        train(model, optimizer, train_loader, use_cuda, epoch, args, scheduler)
         # validation loop
         val_loss = validation(model, val_loader, use_cuda)
         if val_loss < best_val_loss:
