@@ -22,9 +22,4 @@ class Net(nn.Module):
         # Pass x through the EfficientNet model
         x = self.efficientnet(x)
 
-        # add dropout layer
-        x = F.dropout(x, p=0.2, training=self.training)
-
-        # add softmax activation layer
-        x = F.log_softmax(x, dim=1)
         return x
