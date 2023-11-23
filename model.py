@@ -10,20 +10,9 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         # Load the pre-trained EfficientNet_V2_S model
-        self.model = models.efficientnet_b4(weights='DEFAULT')
-
-        # Changing the Classifier
-        self.model.classifier = nn.Sequential(nn.Linear(1408,512),
-                                  nn.ReLU(),
-                                  nn.Dropout(p=0.4),
-                                  nn.Linear(512,128),
-                                  nn.ReLU(),
-                                  nn.Dropout(p=0.4),
-                                  nn.Linear(128,nclasses))
-
-        # Making the Classifier layer Trainable                           
-        for param in self.model.classifier.parameters():
-          param.requires_grad = True
+        self.model = models.efficientnet_v2_s(pretrained=True)
+        # Modify the classifier for the number of classes in your dataset
+        self.model.classifier[1] = torch.nn.Linear(self.model.classifier[1].in_features, nclasses)
 
     def forward(self, x):
         # Forward pass through the network
