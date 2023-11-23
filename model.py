@@ -13,7 +13,7 @@ class Net(nn.Module):
         self.efficientnet = models.swin_v2_t(weights='DEFAULT')
         
         # Replace the last layer with a new, untrained one
-        num_ftrs = self.efficientnet.fc.in_features
+        num_ftrs = self.efficientnet.head.in_features
         self.efficientnet.head = nn.Linear(num_ftrs, nclasses)
 
 
