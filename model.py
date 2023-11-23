@@ -10,7 +10,7 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         # Use pretrained ImageNet model
-        self.resnet50 = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
+        self.resnet50 = models.efficientnet_v2_l(weights=models.EfficientNet_V2_L_Weights.DEFAULT)
         # Replace last layer
         num_ftrs = self.resnet50.fc.in_features
         self.resnet50.fc = nn.Linear(num_ftrs, nclasses)
