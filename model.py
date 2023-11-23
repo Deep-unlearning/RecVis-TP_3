@@ -16,4 +16,8 @@ class Net(nn.Module):
 
     def forward(self, x):
         # Forward pass through the network
-        return self.model(x)
+        x = self.model(x)
+        x = F.dropout(x, p=0.2 training=self.training)
+        x = F.softmax(x, dim=1)
+
+        return x
