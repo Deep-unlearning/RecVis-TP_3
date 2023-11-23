@@ -191,7 +191,7 @@ def main():
         os.makedirs(args.experiment)
 
     # load model and transform
-    model, data_transforms = ModelFactory(args.model_name).get_all()
+    model, data_transforms, data_transforms_train = ModelFactory(args.model_name).get_all()
     if use_cuda:
         print("Using GPU")
         model.cuda()
@@ -200,7 +200,7 @@ def main():
 
     # Data initialization and loading
     train_loader = torch.utils.data.DataLoader(
-        datasets.ImageFolder(args.data + "/train_images", transform=data_transforms),
+        datasets.ImageFolder(args.data + "/train_images", transform=data_transforms_train),
         batch_size=args.batch_size,
         shuffle=True,
         num_workers=args.num_workers,
@@ -213,7 +213,10 @@ def main():
     )
 
     # Setup optimizer
+    # Use Adam optimizer
+    # optimizer = optim.Adam(model.parameters(), lr=args.lr)
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
+
 
     # Loop over the epochs
     best_val_loss = 1e8
