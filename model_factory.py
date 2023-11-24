@@ -35,4 +35,4 @@ class ModelFactory:
         return self.transform
 
     def get_all(self):
-        return self.model, self.transform, self.transforms_train
+        return self.model, self.transform, self.transform_train
