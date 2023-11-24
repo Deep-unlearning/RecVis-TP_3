@@ -21,6 +21,12 @@ class ModelFactory:
         else:
             raise NotImplementedError("Transform not implemented")
 
+    def init_transform_train(self):
+        if self.model_name == "basic_cnn":
+            return data_transforms_train
+        else:
+            raise NotImplementedError("Transform train not implemented")
+
     def get_model(self):
         return self.model
 
