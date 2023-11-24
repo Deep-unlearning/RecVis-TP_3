@@ -13,7 +13,7 @@ class Net(nn.Module):
         self.model = models.efficientnet_b4(weights='DEFAULT')
         # Modify the classifier for the number of classes in your dataset
         # Define the layer up to which you want to freeze
-        freeze_until = 6  # For example, freeze up to the end of block 6 in 'features'
+        freeze_until = 4  # For example, freeze up to the end of block 6 in 'features'
         
         # Freeze layers in 'features' up to the specified block
         for name, parameter in self.model.named_parameters():
