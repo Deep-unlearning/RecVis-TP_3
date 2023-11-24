@@ -13,7 +13,7 @@ data_transforms = transforms.Compose([
 ])
 
 data_transforms_train = transforms.Compose([
-    transforms.Resize((384, 384)),
+    transforms.Resize((224, 224)),
     transforms.RandomHorizontalFlip(),
     transforms.RandomRotation(15),
     transforms.RandomAffine(degrees=0, translate=(0.1, 0.1)),
