@@ -16,7 +16,7 @@ class Net(nn.Module):
         freeze_until = 6  # For example, freeze up to the end of block 6 in 'features'
         
         # Freeze layers in 'features' up to the specified block
-        for name, parameter in model.named_parameters():
+        for name, parameter in self.model.named_parameters():
             if name.split('.')[1].isdigit() and int(name.split('.')[1]) < freeze_until:
                 parameter.requires_grad = False
                 
