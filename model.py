@@ -10,15 +10,15 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         # Load the pre-trained EfficientNet_V2_S model
-        self.model = models.efficientnet_b4(weights='DEFAULT')
+        self.model = models.models.efficientnet_v2_s(weights='DEFAULT')
         # Modify the classifier for the number of classes in your dataset
         # Define the layer up to which you want to freeze
-        freeze_until = 0
-        
-        # Freeze layers in 'features' up to the specified block
-        for name, parameter in self.model.named_parameters():
-            if name.split('.')[1].isdigit() and int(name.split('.')[1]) < freeze_until:
-                parameter.requires_grad = False
+        n_freeze = 2
+
+        for i, block in enumerate(self.model.features):
+            if i < n_freeze:
+                for param in block.parameters():
+                    param.requires_grad = False
                 
         self.model.classifier[1] = torch.nn.Linear(self.model.classifier[1].in_features, nclasses)
 
