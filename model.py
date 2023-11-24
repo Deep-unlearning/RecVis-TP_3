@@ -9,17 +9,15 @@ nclasses = 250
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
-        # Use pretrained ImageNet model
-        self.resnet50 = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
-        # Replace last layer
-        num_ftrs = self.resnet50.fc.in_features
-        self.resnet50.fc = nn.Linear(num_ftrs, nclasses)
-
+        # Load the pre-trained EfficientNet_V2_S model
+        self.model = models.efficientnet_b3(weights='DEFAULT')
+        # Modify the classifier for the number of classes in your dataset
+        self.model.classifier[1] = torch.nn.Linear(self.model.classifier[1].in_features, nclasses)
 
     def forward(self, x):
-        x = self.resnet50(x)
-        # add dropout layer
+        # Forward pass through the network
+        x = self.model(x)
         x = F.dropout(x, p=0.2, training=self.training)
-        # add softmax activation layer
-        x = F.log_softmax(x, dim=1)
+        x = F.softmax(x, dim=1)
+
         return x
