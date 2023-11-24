@@ -12,12 +12,12 @@ class Net(nn.Module):
         # Use pretrained ImageNet model
         self.resnet50 = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
 
-        # Freeze layers up to layer2
-        # for name, param in self.resnet50.named_parameters():
-        #     if "layer1" in name:
-        #         param.requires_grad = False
-        #     else:
-        #         break  # Exit the loop after layer2
+        Freeze layers up to layer2
+        for name, param in self.resnet50.named_parameters():
+            if "layer1" in name:
+                param.requires_grad = False
+            else:
+                break  # Exit the loop after layer2
 
 
         # Replace last layer
