@@ -4,7 +4,7 @@ import torchvision.transforms as transforms
 # by default, we resize the images to 64 x 64 in size
 # and normalize them to mean = 0 and standard-deviation = 1 based on statistics collected from ImageNet
 data_transforms = transforms.Compose([
-    transforms.Resize((380, 380)),
+    transforms.Resize((224, 224)),
     transforms.ToTensor(),
     transforms.Normalize(
         mean=[0.485, 0.456, 0.406],
@@ -13,7 +13,7 @@ data_transforms = transforms.Compose([
 ])
 
 data_transforms_train = transforms.Compose([
-    transforms.Resize((380, 380)),
+    transforms.Resize((224, 224)),
     transforms.RandomHorizontalFlip(),
     transforms.RandomRotation(15),
     transforms.RandomAffine(degrees=0, translate=(0.1, 0.1)),
