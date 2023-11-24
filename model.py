@@ -13,7 +13,7 @@ class Net(nn.Module):
         self.model = models.efficientnet_v2_s(weights='DEFAULT')
         # Modify the classifier for the number of classes in your dataset
         # Define the layer up to which you want to freeze
-        n_freeze = 2
+        n_freeze = 0
 
         for i, block in enumerate(self.model.features):
             if i < n_freeze:
