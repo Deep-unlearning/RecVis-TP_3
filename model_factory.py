@@ -8,6 +8,7 @@ class ModelFactory:
         self.model_name = model_name
         self.model = self.init_model()
         self.transform = self.init_transform()
+        self.transform_train = self.init_transform_train
 
     def init_model(self):
         if self.model_name == "basic_cnn":
@@ -34,4 +35,4 @@ class ModelFactory:
         return self.transform
 
     def get_all(self):
-        return self.model, self.transform
+        return self.model, self.transform, self.transforms_train
