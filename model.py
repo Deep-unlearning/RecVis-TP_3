@@ -13,7 +13,7 @@ class Net(nn.Module):
         self.resnet50 = models.resnet152(weights=models.ResNet152_Weights.IMAGENET1K_V2)
 
         # Freeze layers up to layer2
-        for name, param in self.models.named_parameters():
+        for name, param in self.resnet50.named_parameters():
             if "layer2" in name or "layer1" in name or "conv1" in name or "bn1" in name or "relu" in name or "maxpool" in name:
                 param.requires_grad = False
             else:
