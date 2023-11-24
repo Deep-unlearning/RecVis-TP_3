@@ -25,9 +25,6 @@ class Net(nn.Module):
    
 
     def forward(self, x):
-        x = self.resnet50(x)
-        # add dropout layer
-        x = F.dropout(x, p=0.2, training=self.training)
-        # add softmax activation layer
-        x = F.log_softmax(x, dim=1)
+        x = self.model(x)
+        
         return x
