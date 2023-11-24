@@ -1,5 +1,4 @@
 import torchvision.transforms as transforms
-from torchvision.transforms import v2
 
 # once the images are loaded, how do we pre-process them before being passed into the network
 # by default, we resize the images to 64 x 64 in size
