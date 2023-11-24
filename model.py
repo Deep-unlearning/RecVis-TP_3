@@ -10,7 +10,7 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         # Use pretrained ImageNet model
-        self.resnet50 = models.resnet152(weights=models.ResNet152_Weights.IMAGENET1K_V2)
+        self.resnet50 = models.resnet50(weights=models.ResNet50_Weights.IMAGENET1K_V2)
 
         # Freeze layers up to layer2
         for name, param in self.resnet50.named_parameters():
