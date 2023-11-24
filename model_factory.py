@@ -1,6 +1,6 @@
 """Python file to instantite the model and the transform that goes with it."""
 from model import Net
-from data import data_transforms
+from data import data_transforms, data_transforms_train
 
 
 class ModelFactory:
@@ -8,7 +8,7 @@ class ModelFactory:
         self.model_name = model_name
         self.model = self.init_model()
         self.transform = self.init_transform()
-        self.transform_train = self.init_transform_train
+        self.transform_train = self.init_transform_train()
 
     def init_model(self):
         if self.model_name == "basic_cnn":
@@ -21,7 +21,7 @@ class ModelFactory:
             return data_transforms
         else:
             raise NotImplementedError("Transform not implemented")
-
+        
     def init_transform_train(self):
         if self.model_name == "basic_cnn":
             return data_transforms_train
