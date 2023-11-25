@@ -7,11 +7,10 @@ import torch.optim as optim
 from torch.autograd import Variable
 from torchvision import datasets
 from tqdm import tqdm
-from torchvision.transforms import v2
-from torch.utils.data import default_collate
+import numpy as np
+
 from model_factory import ModelFactory
 
-import numpy as np
 
 def mixup_data(x, y, alpha=1.0, use_cuda=True):
     '''Compute the mixup data. Return mixed inputs, pairs of targets, and lambda'''
@@ -59,7 +58,6 @@ def rand_bbox(size, lam):
     bby2 = np.clip(cy + cut_h // 2, 0, H)
 
     return bbx1, bby1, bbx2, bby2
-
 
 def opts() -> argparse.ArgumentParser:
     """Option Handling Function."""
@@ -166,7 +164,7 @@ def train(
         else:
             # Normal training
             targets_a, targets_b, lam = target, target, 1
-            
+        
         optimizer.zero_grad()
         output = model(data)
         criterion = torch.nn.CrossEntropyLoss(reduction="mean")
@@ -174,11 +172,7 @@ def train(
         loss.backward()
         optimizer.step()
         pred = output.data.max(1, keepdim=True)[1]
-
-        # Convert target to the same shape as pred for comparison
-        target_labels = target.max(1, keepdim=True)[1]
-
-        correct += pred.eq(target_labels).cpu().sum()
+        correct += pred.eq(target.data.view_as(pred)).cpu().sum()
         if batch_idx % args.log_interval == 0:
             print(
                 "Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}".format(
@@ -263,20 +257,11 @@ def main():
         print("Using CPU")
 
     # Data initialization and loading
-    NUM_CLASSES = 250
-    cutmix = v2.CutMix(num_classes=NUM_CLASSES)
-    mixup = v2.MixUp(num_classes=NUM_CLASSES)
-    cutmix_or_mixup = v2.RandomChoice([cutmix, mixup])
-
-    def collate_fn(batch):
-      return cutmix_or_mixup(*default_collate(batch))
-
     train_loader = torch.utils.data.DataLoader(
         datasets.ImageFolder(args.data + "/train_images", transform=data_transforms_train),
         batch_size=args.batch_size,
         shuffle=True,
         num_workers=args.num_workers,
-        collate_fn=collate_fn
     )
     val_loader = torch.utils.data.DataLoader(
         datasets.ImageFolder(args.data + "/val_images", transform=data_transforms),
