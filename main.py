@@ -159,7 +159,7 @@ def train(
 
         # Apply Mixup or CutMix
         if np.random.rand() < 0.5:  # 50% chance to use Mixup/CutMix
-            data, targets_a, targets_b, lam = mixup_data(data, target, alpha=1.0, use_cuda=use_cuda)
+            data, targets_a, targets_b, lam = mixup_data(data, target, alpha=0.2, use_cuda=use_cuda)
             targets_a, targets_b = targets_a.cuda(), targets_b.cuda()
         else:
             # Normal training
