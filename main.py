@@ -11,6 +11,55 @@ from torchvision.transforms import v2
 from torch.utils.data import default_collate
 from model_factory import ModelFactory
 
+import numpy as np
+
+def mixup_data(x, y, alpha=1.0, use_cuda=True):
+    '''Compute the mixup data. Return mixed inputs, pairs of targets, and lambda'''
+    if alpha > 0:
+        lam = np.random.beta(alpha, alpha)
+    else:
+        lam = 1
+
+    batch_size = x.size()[0]
+    if use_cuda:
+        index = torch.randperm(batch_size).cuda()
+    else:
+        index = torch.randperm(batch_size)
+
+    mixed_x = lam * x + (1 - lam) * x[index, :]
+    y_a, y_b = y, y[index]
+    return mixed_x, y_a, y_b, lam
+
+def cutmix_data(x, y, alpha=1.0, use_cuda=True):
+    '''Compute the cutmix data. Return mixed inputs, pairs of targets, and lambda'''
+    # generate mixed sample
+    lam = np.random.beta(alpha, alpha)
+    rand_index = torch.randperm(x.size()[0]).cuda() if use_cuda else torch.randperm(x.size()[0])
+    y_a, y_b = y, y[rand_index]
+    bbx1, bby1, bbx2, bby2 = rand_bbox(x.size(), lam)
+    x[:, :, bbx1:bbx2, bby1:bby2] = x[rand_index, :, bbx1:bbx2, bby1:bby2]
+    # adjust lambda to exactly match pixel ratio
+    lam = 1 - ((bbx2 - bbx1) * (bby2 - bby1) / (x.size()[-1] * x.size()[-2]))
+    return x, y_a, y_b, lam
+
+def rand_bbox(size, lam):
+    W = size[2]
+    H = size[3]
+    cut_rat = np.sqrt(1. - lam)
+    cut_w = np.int(W * cut_rat)
+    cut_h = np.int(H * cut_rat)
+
+    # uniform
+    cx = np.random.randint(W)
+    cy = np.random.randint(H)
+
+    bbx1 = np.clip(cx - cut_w // 2, 0, W)
+    bby1 = np.clip(cy - cut_h // 2, 0, H)
+    bbx2 = np.clip(cx + cut_w // 2, 0, W)
+    bby2 = np.clip(cy + cut_h // 2, 0, H)
+
+    return bbx1, bby1, bbx2, bby2
+
 
 def opts() -> argparse.ArgumentParser:
     """Option Handling Function."""
@@ -109,6 +158,15 @@ def train(
     for batch_idx, (data, target) in enumerate(train_loader):
         if use_cuda:
             data, target = data.cuda(), target.cuda()
+
+        # Apply Mixup or CutMix
+        if np.random.rand() < 0.5:  # 50% chance to use Mixup/CutMix
+            data, targets_a, targets_b, lam = mixup_data(data, target, alpha=1.0, use_cuda=use_cuda)
+            targets_a, targets_b = targets_a.cuda(), targets_b.cuda()
+        else:
+            # Normal training
+            targets_a, targets_b, lam = target, target, 1
+            
         optimizer.zero_grad()
         output = model(data)
         criterion = torch.nn.CrossEntropyLoss(reduction="mean")
