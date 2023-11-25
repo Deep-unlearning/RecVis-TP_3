@@ -271,8 +271,8 @@ def main():
     )
 
     # Setup optimizer
-    # optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-5)
-    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
+    optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-5)
+    # optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
     # Setup scheduler
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
     
