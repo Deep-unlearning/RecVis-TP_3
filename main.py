@@ -158,7 +158,7 @@ def train(
             data, target = data.cuda(), target.cuda()
 
         # Apply Mixup or CutMix
-        if np.random.rand() < 0.35:  # 35% chance to use Mixup/CutMix
+        if np.random.rand() < 0:  # 35% chance to use Mixup/CutMix
             data, targets_a, targets_b, lam = mixup_data(data, target, alpha=0.5, use_cuda=use_cuda)
             targets_a, targets_b = targets_a.cuda(), targets_b.cuda()
         else:
@@ -271,8 +271,8 @@ def main():
     )
 
     # Setup optimizer
-    optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-5)
-    # optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
+    # optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-5)
+    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
     # Setup scheduler
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
     
@@ -298,6 +298,10 @@ def main():
             + best_model_file
             + "` to generate the Kaggle formatted csv file\n"
         )
+        
+    print("Starting training with validation data...")
+    for epoch in range(args.epochs + 1, args.epochs * 2):
+        train(model, optimizer, val_loader, use_cuda, epoch, args, scheduler)
 
 
 if __name__ == "__main__":
