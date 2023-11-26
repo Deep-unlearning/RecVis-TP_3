@@ -157,6 +157,8 @@ def train(
         if use_cuda:
             data, target = data.cuda(), target.cuda()
             
+        criterion = torch.nn.CrossEntropyLoss(reduction="mean")    
+        
         # Randomly choose between CutMix, Mixup, or neither
         method = np.random.choice(['cutmix', 'mixup', 'none'], p=[0.33, 0.33, 0.34])
     
@@ -174,7 +176,6 @@ def train(
         
         optimizer.zero_grad()
         output = model(data)
-        criterion = torch.nn.CrossEntropyLoss(reduction="mean")
         loss = criterion(output, target)
         loss.backward()
         optimizer.step()
