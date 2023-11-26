@@ -255,7 +255,10 @@ def main():
         shuffle=False,
         num_workers=args.num_workers,
     )
-
+    
+    # Load the best model
+    model.load_state_dict(torch.load(best_model_file))
+    
     # Concatenate training and validation data to train on all data
     train_loader_all = torch.utils.data.ConcatDataset([train_loader.dataset, val_loader.dataset])
 
