@@ -10,7 +10,7 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         # Load the pre-trained EfficientNet_V2_S model
-        self.model = models.models.vit_l_16(weights=ViT_L_16_Weights.IMAGENET1K_SWAG_E2E_V1)
+        self.model = models.vit_l_16(weights=ViT_L_16_Weights.IMAGENET1K_SWAG_E2E_V1)
         # Modify the classifier for the number of classes in your dataset
         # Define the layer up to which you want to freeze
                 # Freeze all parameters first
