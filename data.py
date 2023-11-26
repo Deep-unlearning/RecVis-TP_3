@@ -14,12 +14,16 @@ data_transforms = transforms.Compose([
 
 data_transforms_train = transforms.Compose([
     transforms.Resize((384, 384)),
+    transforms.RandomResizingAndCropping((384, 384)),  # adjust target size as needed
     transforms.RandomHorizontalFlip(),
     transforms.RandomRotation(15),
-    transforms.RandomAffine(degrees=0, translate=(0.1, 0.1)),
+    transforms.ColorJitter(brightness=0.2, contrast=0.2),  # adjust these values as needed
+    transforms.RandomAffine(degrees=0, translate=(0.1, 0.1), scale=(0.8, 1.2)),
+    transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5)),
     transforms.ToTensor(),
     transforms.Normalize(
         mean=[0.485, 0.456, 0.406],
         std=[0.229, 0.224, 0.225]
-    )
+    ),
+    transforms.RandomErasing(p=0.2)  # adjust probability as needed
 ])
