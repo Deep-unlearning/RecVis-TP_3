@@ -255,6 +255,12 @@ def main():
             + best_model_file
             + "` to generate the Kaggle formatted csv file\n"
         )
+    
+    # Additional training loop using validation data
+    print("Starting training with validation data...")
+    for epoch in range(args.epochs + 1, args.epochs * 2):
+        train(model, optimizer, val_loader, use_cuda, epoch, args, scheduler)
+        # Optionally, you can also perform validation here or save the model
 
 
 if __name__ == "__main__":
