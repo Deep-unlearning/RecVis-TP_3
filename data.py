@@ -17,7 +17,6 @@ data_transforms_train = transforms.Compose([
     transforms.RandomResizingAndCropping((384, 384)),  # adjust target size as needed
     transforms.RandomHorizontalFlip(),
     transforms.RandomRotation(15),
-    transforms.ColorJitter(brightness=0.2, contrast=0.2),  # adjust these values as needed
     transforms.RandomAffine(degrees=0, translate=(0.1, 0.1), scale=(0.8, 1.2)),
     transforms.GaussianBlur(kernel_size=(5, 9), sigma=(0.1, 5)),
     transforms.ToTensor(),
