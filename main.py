@@ -156,24 +156,15 @@ def train(
     for batch_idx, (data, target) in enumerate(train_loader):
         if use_cuda:
             data, target = data.cuda(), target.cuda()
-
-        # Apply Mixup or CutMix
-        if np.random.rand() < 0:  # 35% chance to use Mixup/CutMix
-            data, targets_a, targets_b, lam = mixup_data(data, target, alpha=0.5, use_cuda=use_cuda)
-            targets_a, targets_b = targets_a.cuda(), targets_b.cuda()
-        else:
-            # Normal training
-            targets_a, targets_b, lam = target, target, 1
-
-        
+  
         # Randomly choose between CutMix, Mixup, or neither
         method = np.random.choice(['cutmix', 'mixup', 'none'], p=[0.33, 0.33, 0.34])
     
         if method == 'cutmix':
-            data, target_a, target_b, lam = cutmix_data(data, target)
+            data, target_a, target_b, lam = cutmix_data(data, target, alpha=0.5)
             targets_a, targets_b = targets_a.cuda(), targets_b.cuda()
         elif method == 'mixup':
-            data, target_a, target_b, lam = mixup_data(data, target)
+            data, target_a, target_b, lam = mixup_data(data, target, alpha=0.5)
             targets_a, targets_b = targets_a.cuda(), targets_b.cuda()
         else:
             targets_a, targets_b, lam = target, target, 1
