@@ -258,9 +258,17 @@ def main():
     
     # Load the best model
     model.load_state_dict(torch.load(best_model_file))
+
+    # Concatenate datasets
+    combined_dataset = ConcatDataset([train_loader.dataset, val_loader.dataset])
     
-    # Concatenate training and validation data to train on all data
-    train_loader_all = torch.utils.data.ConcatDataset([train_loader.dataset, val_loader.dataset])
+    # Create a DataLoader for the combined dataset
+    train_loader_all = DataLoader(
+        combined_dataset, 
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=args.num_workers,
+    )
 
     # Train on all data
     # Setup optimizer
