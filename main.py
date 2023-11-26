@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.autograd import Variable
+from torchvision import datasets
 from torch.utils.data import DataLoader, ConcatDataset
 from tqdm import tqdm
 
