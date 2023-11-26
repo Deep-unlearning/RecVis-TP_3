@@ -277,7 +277,7 @@ def main():
 
     # Training loop
     train(model, optimizer, train_loader_all, use_cuda, 0, args, scheduler)
-
+    validation(model, val_loader, use_cuda)
     # Save the model
     model_file = args.experiment + "/model.pth"
     torch.save(model.state_dict(), model_file)
