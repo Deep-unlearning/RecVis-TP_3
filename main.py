@@ -255,6 +255,9 @@ def main():
             + best_model_file
             + "` to generate the Kaggle formatted csv file\n"
         )
+
+    # Load the best model
+    model.load_state_dict(torch.load(best_model_file))
     
     # Additional training loop using validation data
     print("Starting training with validation data...")
