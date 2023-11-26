@@ -241,6 +241,34 @@ def main():
             + best_model_file
             + "` to generate the Kaggle formatted csv file\n"
         )
+        
+    # Data initialization and loading
+    train_loader = torch.utils.data.DataLoader(
+        datasets.ImageFolder(args.data + "/train_images", transform=data_transforms_train),
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=args.num_workers,
+    )
+    val_loader = torch.utils.data.DataLoader(
+        datasets.ImageFolder(args.data + "/val_images", transform=data_transforms_train),
+        batch_size=args.batch_size,
+        shuffle=False,
+        num_workers=args.num_workers,
+    )
+
+    # Concatenate training and validation data to train on all data
+    train_loader_all = torch.utils.data.ConcatDataset([train_loader.dataset, val_loader.dataset])
+
+    # Train on all data
+    # Setup optimizer
+    optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-5)
+
+    # Training loop
+    train(model, optimizer, train_loader_all, use_cuda, 0, args, scheduler)
+
+    # Save the model
+    model_file = args.experiment + "/model.pth"
+    torch.save(model.state_dict(), model_file)
 
 
 if __name__ == "__main__":
