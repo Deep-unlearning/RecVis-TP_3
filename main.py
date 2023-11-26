@@ -7,57 +7,9 @@ import torch.optim as optim
 from torch.autograd import Variable
 from torchvision import datasets
 from tqdm import tqdm
-import numpy as np
 
 from model_factory import ModelFactory
 
-
-def mixup_data(x, y, alpha=1.0, use_cuda=True):
-    '''Compute the mixup data. Return mixed inputs, pairs of targets, and lambda'''
-    if alpha > 0:
-        lam = np.random.beta(alpha, alpha)
-    else:
-        lam = 1
-
-    batch_size = x.size()[0]
-    if use_cuda:
-        index = torch.randperm(batch_size).cuda()
-    else:
-        index = torch.randperm(batch_size)
-
-    mixed_x = lam * x + (1 - lam) * x[index, :]
-    y_a, y_b = y, y[index]
-    return mixed_x, y_a, y_b, lam
-
-def cutmix_data(x, y, alpha=1.0, use_cuda=True):
-    '''Compute the cutmix data. Return mixed inputs, pairs of targets, and lambda'''
-    # generate mixed sample
-    lam = np.random.beta(alpha, alpha)
-    rand_index = torch.randperm(x.size()[0]).cuda() if use_cuda else torch.randperm(x.size()[0])
-    y_a, y_b = y, y[rand_index]
-    bbx1, bby1, bbx2, bby2 = rand_bbox(x.size(), lam)
-    x[:, :, bbx1:bbx2, bby1:bby2] = x[rand_index, :, bbx1:bbx2, bby1:bby2]
-    # adjust lambda to exactly match pixel ratio
-    lam = 1 - ((bbx2 - bbx1) * (bby2 - bby1) / (x.size()[-1] * x.size()[-2]))
-    return x, y_a, y_b, lam
-
-def rand_bbox(size, lam):
-    W = size[2]
-    H = size[3]
-    cut_rat = np.sqrt(1. - lam)
-    cut_w = int(W * cut_rat)
-    cut_h = int(H * cut_rat)
-
-    # uniform
-    cx = np.random.randint(W)
-    cy = np.random.randint(H)
-
-    bbx1 = np.clip(cx - cut_w // 2, 0, W)
-    bby1 = np.clip(cy - cut_h // 2, 0, H)
-    bbx2 = np.clip(cx + cut_w // 2, 0, W)
-    bby2 = np.clip(cy + cut_h // 2, 0, H)
-
-    return bbx1, bby1, bbx2, bby2
 
 def opts() -> argparse.ArgumentParser:
     """Option Handling Function."""
@@ -156,26 +108,9 @@ def train(
     for batch_idx, (data, target) in enumerate(train_loader):
         if use_cuda:
             data, target = data.cuda(), target.cuda()
-
-        criterion = torch.nn.CrossEntropyLoss(reduction="mean")
-        
-        # Randomly choose between CutMix, Mixup, or neither
-        method = np.random.choice(['cutmix', 'mixup', 'none'], p=[0.33, 0.33, 0.34])
-    
-        if method == 'cutmix':
-            data, target_a, target_b, lam = cutmix_data(data, target)
-            output = model(data)
-            loss = lam * criterion(output, target_a) + (1 - lam) * criterion(output, target_b)
-        elif method == 'mixup':
-            data, target_a, target_b, lam = mixup_data(data, target)
-            output = model(data)
-            loss = lam * criterion(output, target_a) + (1 - lam) * criterion(output, target_b)
-        else:
-            output = model(data)
-            loss = criterion(output, target)
-            
         optimizer.zero_grad()
         output = model(data)
+        criterion = torch.nn.CrossEntropyLoss(reduction="mean")
         loss = criterion(output, target)
         loss.backward()
         optimizer.step()
@@ -306,10 +241,6 @@ def main():
             + best_model_file
             + "` to generate the Kaggle formatted csv file\n"
         )
-        
-    print("Starting training with validation data...")
-    for epoch in range(args.epochs + 1, args.epochs * 2):
-        train(model, optimizer, val_loader, use_cuda, epoch, args, scheduler)
 
 
 if __name__ == "__main__":
