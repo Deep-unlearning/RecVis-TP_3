@@ -14,7 +14,6 @@ data_transforms = transforms.Compose([
 
 data_transforms_train = transforms.Compose([
     transforms.Resize((384, 384)),
-    transforms.RandomResizingAndCropping((384, 384)),  # adjust target size as needed
     transforms.RandomHorizontalFlip(),
     transforms.RandomRotation(15),
     transforms.RandomAffine(degrees=0, translate=(0.1, 0.1), scale=(0.8, 1.2)),
