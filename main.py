@@ -156,26 +156,18 @@ def train(
     for batch_idx, (data, target) in enumerate(train_loader):
         if use_cuda:
             data, target = data.cuda(), target.cuda()
-            
-        criterion = torch.nn.CrossEntropyLoss(reduction="mean")    
-        
-        # Randomly choose between CutMix, Mixup, or neither
-        method = np.random.choice(['cutmix', 'mixup', 'none'], p=[0.33, 0.33, 0.34])
-    
-        if method == 'cutmix':
-            data, target_a, target_b, lam = cutmix_data(data, target)
-            output = model(data)
-            loss = lam * criterion(output, target_a) + (1 - lam) * criterion(output, target_b)
-        elif method == 'mixup':
-            data, target_a, target_b, lam = mixup_data(data, target)
-            output = model(data)
-            loss = lam * criterion(output, target_a) + (1 - lam) * criterion(output, target_b)
+
+        # Apply Mixup or CutMix
+        if np.random.rand() < 0:  # 35% chance to use Mixup/CutMix
+            data, targets_a, targets_b, lam = mixup_data(data, target, alpha=0.5, use_cuda=use_cuda)
+            targets_a, targets_b = targets_a.cuda(), targets_b.cuda()
         else:
-            output = model(data)
-            loss = criterion(output, target)
+            # Normal training
+            targets_a, targets_b, lam = target, target, 1
         
         optimizer.zero_grad()
         output = model(data)
+        criterion = torch.nn.CrossEntropyLoss(reduction="mean")
         loss = criterion(output, target)
         loss.backward()
         optimizer.step()
