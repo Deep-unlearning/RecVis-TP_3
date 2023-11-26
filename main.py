@@ -164,6 +164,19 @@ def train(
         else:
             # Normal training
             targets_a, targets_b, lam = target, target, 1
+
+        
+        # Randomly choose between CutMix, Mixup, or neither
+        method = np.random.choice(['cutmix', 'mixup', 'none'], p=[0.33, 0.33, 0.34])
+    
+        if method == 'cutmix':
+            data, target_a, target_b, lam = cutmix_data(data, target)
+            targets_a, targets_b = targets_a.cuda(), targets_b.cuda()
+        elif method == 'mixup':
+            data, target_a, target_b, lam = mixup_data(data, target)
+            targets_a, targets_b = targets_a.cuda(), targets_b.cuda()
+        else:
+            targets_a, targets_b, lam = target, target, 1
         
         optimizer.zero_grad()
         output = model(data)
