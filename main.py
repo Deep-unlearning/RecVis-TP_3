@@ -214,6 +214,31 @@ def main():
         num_workers=args.num_workers,
     )
 
+    # Data initialization and loading
+    train_loader_train = torch.utils.data.DataLoader(
+        datasets.ImageFolder(args.data + "/train_images", transform=data_transforms_train),
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=args.num_workers,
+    )
+    val_loader_train = torch.utils.data.DataLoader(
+        datasets.ImageFolder(args.data + "/val_images", transform=data_transforms_train),
+        batch_size=args.batch_size,
+        shuffle=False,
+        num_workers=args.num_workers,
+    )
+    
+    # Concatenate datasets
+    combined_dataset = ConcatDataset([train_loader_train.dataset, val_loader_train.dataset])
+    
+    # Create a DataLoader for the combined dataset
+    train_loader = DataLoader(
+        combined_dataset, 
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=args.num_workers,
+    )
+    
     # Setup optimizer
     # optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-5)
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
@@ -243,33 +268,7 @@ def main():
             + "` to generate the Kaggle formatted csv file\n"
         )
         
-    # Data initialization and loading
-    train_loader = torch.utils.data.DataLoader(
-        datasets.ImageFolder(args.data + "/train_images", transform=data_transforms_train),
-        batch_size=args.batch_size,
-        shuffle=True,
-        num_workers=args.num_workers,
-    )
-    val_loader = torch.utils.data.DataLoader(
-        datasets.ImageFolder(args.data + "/val_images", transform=data_transforms_train),
-        batch_size=args.batch_size,
-        shuffle=False,
-        num_workers=args.num_workers,
-    )
-    
-    # Load the best model
-    model.load_state_dict(torch.load(best_model_file))
 
-    # Concatenate datasets
-    combined_dataset = ConcatDataset([train_loader.dataset, val_loader.dataset])
-    
-    # Create a DataLoader for the combined dataset
-    train_loader_all = DataLoader(
-        combined_dataset, 
-        batch_size=args.batch_size,
-        shuffle=True,
-        num_workers=args.num_workers,
-    )
 
     # Train on all data
     # Setup optimizer
