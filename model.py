@@ -11,9 +11,9 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         # Load the pre-trained EfficientNet_V2_S model
-        self.model = timm.create_model('eva02_small_patch14_336.mim_in22k_ft_in1k', pretrained=True)
+        self.model = timm.create_model('convnext_base.fb_in22k_ft_in1k', pretrained=True, num_classes = nclasses)
       
-        self.model.head = nn.Linear(384, nclasses)
+        self.model.head_drop = nn.Dropout(0.2)
 
     def forward(self, x):
         x = self.model(x)
