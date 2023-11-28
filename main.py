@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.autograd import Variable
 from torchvision import datasets
+from torch.utils.data import DataLoader, ConcatDataset
 from tqdm import tqdm
 
 from model_factory import ModelFactory
@@ -133,6 +134,7 @@ def train(
             100.0 * correct / len(train_loader.dataset),
         )
     )
+    scheduler.step()
 
 def validation(
     model: nn.Module,
@@ -212,18 +214,42 @@ def main():
         num_workers=args.num_workers,
     )
 
+    # Data initialization and loading
+    train_loader_train = torch.utils.data.DataLoader(
+        datasets.ImageFolder(args.data + "/train_images", transform=data_transforms_train),
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=args.num_workers,
+    )
+    val_loader_train = torch.utils.data.DataLoader(
+        datasets.ImageFolder(args.data + "/val_images", transform=data_transforms_train),
+        batch_size=args.batch_size,
+        shuffle=False,
+        num_workers=args.num_workers,
+    )
+    
+    # Concatenate datasets
+    combined_dataset = ConcatDataset([train_loader_train.dataset, val_loader_train.dataset])
+    
+    # Create a DataLoader for the combined dataset
+    train_loader = DataLoader(
+        combined_dataset, 
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=args.num_workers,
+    )
+    
     # Setup optimizer
     # optimizer = optim.Adam(model.parameters(), lr=args.lr, weight_decay=1e-5)
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
     # Setup scheduler
-    # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
-    Scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=10)
-
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=10)
+    
     # Loop over the epochs
     best_val_loss = 1e8
     for epoch in range(1, args.epochs + 1):
         # training loop
-        train(model, optimizer, train_loader, use_cuda, epoch, args)
+        train(model, optimizer, train_loader, use_cuda, epoch, args, scheduler)
         # validation loop
         val_loss = validation(model, val_loader, use_cuda)
         if val_loss < best_val_loss:
@@ -242,25 +268,7 @@ def main():
             + "` to generate the Kaggle formatted csv file\n"
         )
         
-    # Data initialization and loading
-    train_loader = torch.utils.data.DataLoader(
-        datasets.ImageFolder(args.data + "/train_images", transform=data_transforms_train),
-        batch_size=args.batch_size,
-        shuffle=True,
-        num_workers=args.num_workers,
-    )
-    val_loader = torch.utils.data.DataLoader(
-        datasets.ImageFolder(args.data + "/val_images", transform=data_transforms_train),
-        batch_size=args.batch_size,
-        shuffle=False,
-        num_workers=args.num_workers,
-    )
-    
-    # Load the best model
-    model.load_state_dict(torch.load(best_model_file))
-    
-    # Concatenate training and validation data to train on all data
-    train_loader_all = torch.utils.data.ConcatDataset([train_loader.dataset, val_loader.dataset])
+
 
     # Train on all data
     # Setup optimizer
@@ -268,7 +276,7 @@ def main():
 
     # Training loop
     train(model, optimizer, train_loader_all, use_cuda, 0, args, scheduler)
-
+    validation(model, val_loader, use_cuda)
     # Save the model
     model_file = args.experiment + "/model.pth"
     torch.save(model.state_dict(), model_file)
