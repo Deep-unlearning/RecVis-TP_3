@@ -133,7 +133,6 @@ def train(
             100.0 * correct / len(train_loader.dataset),
         )
     )
-    scheduler.step()
 
 def validation(
     model: nn.Module,
